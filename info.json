@@ -1,0 +1,11 @@
+{
+    "name": "ick-automatic-train-repair",
+    "version": "1.1.0",
+    "title": "Automatic train repair",
+    "author": "ickputzdirwech",
+    "contact": "ickputzdirwech@gmx.de",
+    "homepage": "github.com/ickputzdirwech/ick-automatic-train-repair",
+    "factorio_version": "1.1",
+    "dependencies":["base >= 1.1.33"],
+    "description": "If any locomotive or wagon is destroyed the train is stopped and a ghost is created. Including inventory filters and inventory limit, fuel and equipment. As soon as the train is fully repaired it is set to automatic mode again."
+}
