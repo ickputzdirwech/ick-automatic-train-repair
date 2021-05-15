@@ -1,0 +1,19 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Date: 2021-05-15
+  Changes:
+    - Added changelog.
+    - Added thumbnail.
+    - The mod can now be translated on Crowdin (https://crowdin.com/project/factorio-mods-localization).
+
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 2020-05-15
+  Features:
+    - Initial release
+    - If any locomotive or wagon is destroyed the train is stopped and a ghost is created.
+    - Including inventory filters, inventory limit and requests for fuel and equipment.
+    - As soon as the train is fully repaired it is set to automatic mode again.
+    - Map setting to disable item requests.
+    - Map setting to specifiy which fuel shold be requested.
+    - Map ettings to disable automatically enabling automatic mode.

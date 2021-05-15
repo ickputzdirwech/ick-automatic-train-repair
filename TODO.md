@@ -1,3 +1,8 @@
+# GENERAL
+* Thumbnail
+*
+
+
 # ALTERNATIVE SOLUTION:
 * Placeholder wagons
 * Special train station where trains are fixed
