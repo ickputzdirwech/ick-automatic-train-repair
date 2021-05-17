@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 2021-05-16
+  Features:
+    - Added custom alert when rolling stock is destroyed. Thanks to PietersieliePC for the idea.
+    - Added player setting to disable alerts.
+    - Added smoke effect to simulate an emergency break. Thanks to Nosferatu for the idea.
+  Changes:
+    - Trains will no longer be set to automatic mode if they were destroyed by another train.
+    - Map settings "automatically enable automatic mode" default is now false. There are too many unsolved issues with it.
+  Bugfixes:
+    - Fixed that locomotives sometimes didn't have the right orientation. Thanks to boskid.
+
+---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 2021-05-15
   Changes:
@@ -16,4 +29,4 @@ Date: 2020-05-15
     - As soon as the train is fully repaired it is set to automatic mode again.
     - Map setting to disable item requests.
     - Map setting to specifiy which fuel shold be requested.
-    - Map ettings to disable automatically enabling automatic mode.
+    - Map setting to disable automatically enabling automatic mode.

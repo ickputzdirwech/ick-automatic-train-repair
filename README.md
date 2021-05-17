@@ -5,15 +5,18 @@ If any locomotive or wagon is destroyed the train it belongs to is brought to an
 ## Settings
 The following map settings are available:
 
-* Automatically enable automatic mode (trains will be set to automatic mode again as soon as all entity ghosts were built). Default = true
+* Automatically enable automatic mode (trains will be set to automatic mode again as soon as all entity ghosts were built). Default = false
 * Create item requests for destroyed equipment. Default = true
 * Create item requests for fuel. Default = true
 * Name of the fuel that should be requested (if left empty the destroyed fuel will be requested). Default = empty
 * How much of the fuel should be requested. Default = 1
 
+The following player setting is available:
+* Create alerts. Default = true
+
 
 ## Known issues
-* Locomotives sometimes don't have the right orientation.
+* If multiple rolling stock were destroyed, they need to be rebuild in reverse order for the automatic mode to work
 * The check whether a train is complete again is relatively simple. It doesn't wait for all item requests to be fulfilled and can't tell the difference between different entities of the same type.
 * Equipment is inserted into cargo inventory first and only moved into the grid if the item request is fulfilled completely or otherwise destroyed.
 * The item request icons in ghosts for wagons are, unlike for locomotives, not grouped.

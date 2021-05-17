@@ -2,6 +2,24 @@
 script.on_event(defines.events.on_entity_died, function(event)
     local entity = event.entity
 	local train = entity.train
+	-- creates train breaking smoke
+	if train.speed > 0 then
+		for _, carriage in pairs(train.carriages) do
+			if carriage.type ~= "locomotive" then
+				game.print(carriage.orientation)
+				for i = -15, 15 do
+					local x = carriage.position.x + math.cos(math.pi * (carriage.orientation * 2 + 0.5)) * i/5
+					local y = carriage.position.y + math.sin(math.pi * (carriage.orientation * 2 + 0.5)) * i/5
+					local offset_1_x = math.cos(math.pi * carriage.orientation * 2) * 0.75
+					local offset_1_y = math.sin(math.pi * carriage.orientation * 2) * 0.75
+					game.surfaces[entity.surface.name].create_trivial_smoke{name = "smoke-train-stop", position = {x + offset_1_x, y + offset_1_y}}
+					local offset_2_x = math.cos(math.pi * carriage.orientation * 2) * -0.75
+					local offset_2_y = math.sin(math.pi * carriage.orientation * 2) * -0.75
+					game.surfaces[entity.surface.name].create_trivial_smoke{name = "smoke-train-stop", position = {x + offset_2_x, y + offset_2_y}}
+				end
+			end
+		end
+	end
 	-- stops the train
     train.speed = 0
 	-- creates ghost entity
@@ -9,10 +27,20 @@ script.on_event(defines.events.on_entity_died, function(event)
         name = "entity-ghost",
         inner_name = entity.name,
         position = entity.position,
-		direction = entity.direction,
+		orientation = entity.orientation,
         force = entity.force,
         create_build_effect_smoke = false,
     }
+	-- creates custom alert
+	local message = {"gui-alert-tooltip.ick-destroyed-train", entity.localised_name, "?"}
+	if event.cause then
+		message = {"gui-alert-tooltip.ick-destroyed-train", entity.localised_name, event.cause.localised_name}
+	end
+	for _, player in pairs(game.players) do
+		if player.force == entity.force and player.mod_settings["ick-alert"].value then
+			player.add_custom_alert(ghost_entity, {type = "virtual", name = "ick-signal-destroyed-train"}, message, true)
+		end
+	end
 	-- checks if destroyed entity had any special properties
 	local fuel_inv = entity.get_fuel_inventory()
 	local wagon_inv = entity.get_inventory(defines.inventory.cargo_wagon)
@@ -24,7 +52,7 @@ script.on_event(defines.events.on_entity_died, function(event)
 			break
 		end
 	end
-	if train.manual_mode == false or (entity.grid and entity.grid.equipment[1]) or (fuel_inv and fuel_inv.is_empty() == false) or (wagon_inv.is_filtered() or (wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv))) or found_proxies then
+	if (train.manual_mode == false and event.cause and event.cause.train == nil) or (entity.grid and entity.grid.equipment[1]) or (fuel_inv and fuel_inv.is_empty() == false) or (wagon_inv.is_filtered() or (wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv))) or found_proxies then
 		-- registers the ghost entity
 		local registration_number = script.register_on_entity_destroyed(ghost_entity)
 		-- saves type, name and position
@@ -33,7 +61,7 @@ script.on_event(defines.events.on_entity_died, function(event)
 		end
 		global.ick_destroyed_train[registration_number] = {type = entity.type, name = entity.name, position = entity.position}
 		-- saves number of carriages per type if train is in automatic mode
-		if train.manual_mode == false then
+		if train.manual_mode == false and event.cause and event.cause.train == nil then
 			local carriages = {["locomotive"] = 0, ["cargo-wagon"] = 0, ["fluid-wagon"] = 0, ["artillery-wagon"] = 0}
 			for _, entity in pairs(train.carriages) do
 				carriages[entity.type] = carriages[entity.type] + 1

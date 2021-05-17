@@ -1,5 +1,4 @@
 # GENERAL
-* Thumbnail
 *
 
 
@@ -9,19 +8,14 @@
 * What if all locomotives are destroyed?
 	- allow train to only go to specific station
 	- low top speed
-* Problems crashing into each other
-* Startup setting
+* What if trains crash into each other?
 *
 
 
-# LIMITAIONS:
-* Equipment is inserted into cargo inventory first and only moved if the item request is fulfilled completey.
+# BUGS/LIMITAIONS:
+* If multiple rolling stock were destroyed, the automatically enabling automatic mode doesn't work properly in most cases.
 * The check whether a train is complete again is relatively simple. It doesn't wait for all item requests to be fulfilled and can't tell the difference between different entities of the same type.
-*
-
-
-# VANILLA BUGS:
-* Orientation of locomotives. --> REPORTED
+* Equipment is inserted into cargo inventory first and only moved if the item request is fulfilled completey.
 *
 
 
