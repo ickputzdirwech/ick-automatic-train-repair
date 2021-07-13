@@ -52,7 +52,7 @@ script.on_event(defines.events.on_entity_died, function(event)
 			break
 		end
 	end
-	if (train.manual_mode == false and event.cause and event.cause.train == nil) or (entity.grid and entity.grid.equipment[1]) or (fuel_inv and fuel_inv.is_empty() == false) or (wagon_inv.is_filtered() or (wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv))) or found_proxies then
+	if (train.manual_mode == false and event.cause and event.cause.train == nil) or (entity.grid and entity.grid.equipment[1]) or (fuel_inv and fuel_inv.is_empty() == false) or (wagon_inv and (wagon_inv.is_filtered() or (wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv)))) or found_proxies then
 		-- registers the ghost entity
 		local registration_number = script.register_on_entity_destroyed(ghost_entity)
 		-- saves type, name and position
@@ -106,17 +106,19 @@ script.on_event(defines.events.on_entity_died, function(event)
 			end
 		end
 		ghost_entity.item_requests = requests
-		-- saves inventory filters
-		if wagon_inv.is_filtered() then
-			local filters = {}
-			for i = 1, #wagon_inv do
-				table.insert(filters, i, wagon_inv.get_filter(i))
+		if wagon_inv then
+			-- saves inventory filters
+			if wagon_inv.is_filtered() then
+				local filters = {}
+				for i = 1, #wagon_inv do
+					table.insert(filters, i, wagon_inv.get_filter(i))
+				end
+				global.ick_destroyed_train[registration_number].filters = filters
 			end
-			global.ick_destroyed_train[registration_number].filters = filters
-		end
-		-- saves inventory limit
-		if wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv) then
-			global.ick_destroyed_train[registration_number].bar = wagon_inv.get_bar()
+			-- saves inventory limit
+			if wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv) then
+				global.ick_destroyed_train[registration_number].bar = wagon_inv.get_bar()
+			end
 		end
 	end
 end, {{filter = "rolling-stock"}})

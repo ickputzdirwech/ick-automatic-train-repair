@@ -12,6 +12,7 @@ The following map settings are available:
 * How much of the fuel should be requested. Default = 1
 
 The following player setting is available:
+
 * Create alerts. Default = true
 
 

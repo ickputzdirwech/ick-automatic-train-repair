@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.3
+Date: 2021-07-13
+  Bugfixes:
+    - Fixed error when fluid wagon was destroyed. Thanks to qwerty12butt for the report.
+
+---------------------------------------------------------------------------------------------------
 Version: 1.1.2
-Date: 2021-05-16
+Date: 2021-05-17
   Features:
     - Added custom alert when rolling stock is destroyed. Thanks to PietersieliePC for the idea.
     - Added player setting to disable alerts.
