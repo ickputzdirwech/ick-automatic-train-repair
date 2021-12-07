@@ -44,5 +44,5 @@ data:extend(
 	order = "f[fuel-amount]",
 	minimum_value = 1,
     default_value = 1
-  },
+  }
 })

@@ -1,123 +1,125 @@
 -- ON ENTITY DIED
 script.on_event(defines.events.on_entity_died, function(event)
     local entity = event.entity
-	local train = entity.train
-	-- creates train breaking smoke
-	if train.speed > 0 then
-		for _, carriage in pairs(train.carriages) do
-			if carriage.type ~= "locomotive" then
-				game.print(carriage.orientation)
-				for i = -15, 15 do
-					local x = carriage.position.x + math.cos(math.pi * (carriage.orientation * 2 + 0.5)) * i/5
-					local y = carriage.position.y + math.sin(math.pi * (carriage.orientation * 2 + 0.5)) * i/5
-					local offset_1_x = math.cos(math.pi * carriage.orientation * 2) * 0.75
-					local offset_1_y = math.sin(math.pi * carriage.orientation * 2) * 0.75
-					game.surfaces[entity.surface.name].create_trivial_smoke{name = "smoke-train-stop", position = {x + offset_1_x, y + offset_1_y}}
-					local offset_2_x = math.cos(math.pi * carriage.orientation * 2) * -0.75
-					local offset_2_y = math.sin(math.pi * carriage.orientation * 2) * -0.75
-					game.surfaces[entity.surface.name].create_trivial_smoke{name = "smoke-train-stop", position = {x + offset_2_x, y + offset_2_y}}
-				end
-			end
-		end
-	end
-	-- stops the train
-    train.speed = 0
-	-- creates ghost entity
-    local ghost_entity = game.surfaces[entity.surface.name].create_entity{
-        name = "entity-ghost",
-        inner_name = entity.name,
-        position = entity.position,
-		orientation = entity.orientation,
-        force = entity.force,
-        create_build_effect_smoke = false,
-    }
-	-- creates custom alert
-	local message = {"gui-alert-tooltip.ick-destroyed-train", entity.localised_name, "?"}
-	if event.cause then
-		message = {"gui-alert-tooltip.ick-destroyed-train", entity.localised_name, event.cause.localised_name}
-	end
-	for _, player in pairs(game.players) do
-		if player.force == entity.force and player.mod_settings["ick-alert"].value then
-			player.add_custom_alert(ghost_entity, {type = "virtual", name = "ick-signal-destroyed-train"}, message, true)
-		end
-	end
-	-- checks if destroyed entity had any special properties
-	local fuel_inv = entity.get_fuel_inventory()
-	local wagon_inv = entity.get_inventory(defines.inventory.cargo_wagon)
-	local request_proxies = game.surfaces[entity.surface.name].find_entities_filtered{type = "item-request-proxy", name = "item-request-proxy", position = entity.position}
-	local found_proxies = false
-	for _, proxy in pairs(request_proxies) do
-		if proxy.proxy_target == entity then
-			found_proxies = true
-			break
-		end
-	end
-	if (train.manual_mode == false and event.cause and event.cause.train == nil) or (entity.grid and entity.grid.equipment[1]) or (fuel_inv and fuel_inv.is_empty() == false) or (wagon_inv and (wagon_inv.is_filtered() or (wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv)))) or found_proxies then
-		-- registers the ghost entity
-		local registration_number = script.register_on_entity_destroyed(ghost_entity)
-		-- saves type, name and position
-		if global.ick_destroyed_train == nil then
-			global.ick_destroyed_train = {}
-		end
-		global.ick_destroyed_train[registration_number] = {type = entity.type, name = entity.name, position = entity.position}
-		-- saves number of carriages per type if train is in automatic mode
-		if train.manual_mode == false and event.cause and event.cause.train == nil then
-			local carriages = {["locomotive"] = 0, ["cargo-wagon"] = 0, ["fluid-wagon"] = 0, ["artillery-wagon"] = 0}
-			for _, entity in pairs(train.carriages) do
-				carriages[entity.type] = carriages[entity.type] + 1
-			end
-			global.ick_destroyed_train[registration_number].train = carriages
-		end
-		-- adds request for fuel
-		local requests = {}
-		if settings.global["ick-include-fuel"].value then
-			if game.item_prototypes[settings.global["ick-fuel-type"].value] then
-				requests = {[settings.global["ick-fuel-type"].value] = settings.global["ick-fuel-amount"].value}
-			elseif fuel_inv and fuel_inv.is_empty() == false then
-				requests = fuel_inv.get_contents()
-			end
-		end
-		-- adds request for equipment
-		if settings.global["ick-include-equipment"].value and entity.grid and entity.grid.equipment[1] then
-			for name, count in pairs(entity.grid.get_contents()) do
-				if requests[name] then
-					requests[name] = requests[name] + count
-				else
-					requests[name] = count
-				end
-			end
-			-- save equipment if entity is a cargo wagon
-			if entity.type == "cargo-wagon" then
-				global.ick_destroyed_train[registration_number].equipment = entity.grid.get_contents()
-			end
-		end
-		-- adds request for item-request-proxies
-		if found_proxies then
-			for _, proxy in pairs(request_proxies) do
-				if proxy.proxy_target == entity then
-					for name, count in pairs(proxy.item_requests) do
-						if requests[name] then
-							requests[name] = requests[name] + count
-						else
-							requests[name] = count
-						end
+	if entity.prototype.items_to_place_this then
+		local train = entity.train
+		-- creates train breaking smoke
+		if train.speed > 0 then
+			for _, carriage in pairs(train.carriages) do
+				if carriage.type ~= "locomotive" then
+					game.print(carriage.orientation)
+					for i = -15, 15 do
+						local x = carriage.position.x + math.cos(math.pi * (carriage.orientation * 2 + 0.5)) * i/5
+						local y = carriage.position.y + math.sin(math.pi * (carriage.orientation * 2 + 0.5)) * i/5
+						local offset_1_x = math.cos(math.pi * carriage.orientation * 2) * 0.75
+						local offset_1_y = math.sin(math.pi * carriage.orientation * 2) * 0.75
+						game.surfaces[entity.surface.name].create_trivial_smoke{name = "smoke-train-stop", position = {x + offset_1_x, y + offset_1_y}}
+						local offset_2_x = math.cos(math.pi * carriage.orientation * 2) * -0.75
+						local offset_2_y = math.sin(math.pi * carriage.orientation * 2) * -0.75
+						game.surfaces[entity.surface.name].create_trivial_smoke{name = "smoke-train-stop", position = {x + offset_2_x, y + offset_2_y}}
 					end
 				end
 			end
 		end
-		ghost_entity.item_requests = requests
-		if wagon_inv then
-			-- saves inventory filters
-			if wagon_inv.is_filtered() then
-				local filters = {}
-				for i = 1, #wagon_inv do
-					table.insert(filters, i, wagon_inv.get_filter(i))
-				end
-				global.ick_destroyed_train[registration_number].filters = filters
+		-- stops the train
+		train.speed = 0
+		-- creates ghost entity
+		local ghost_entity = game.surfaces[entity.surface.name].create_entity{
+			name = "entity-ghost",
+			inner_name = entity.name,
+			position = entity.position,
+			orientation = entity.orientation,
+			force = entity.force,
+			create_build_effect_smoke = false,
+		}
+		-- creates custom alert
+		local message = {"gui-alert-tooltip.ick-destroyed-train", entity.localised_name, "?"}
+		if event.cause then
+			message = {"gui-alert-tooltip.ick-destroyed-train", entity.localised_name, event.cause.localised_name}
+		end
+		for _, player in pairs(game.players) do
+			if player.force == entity.force and player.mod_settings["ick-alert"].value then
+				player.add_custom_alert(ghost_entity, {type = "virtual", name = "ick-signal-destroyed-train"}, message, true)
 			end
-			-- saves inventory limit
-			if wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv) then
-				global.ick_destroyed_train[registration_number].bar = wagon_inv.get_bar()
+		end
+		-- checks if destroyed entity had any special properties
+		local fuel_inv = entity.get_fuel_inventory()
+		local wagon_inv = entity.get_inventory(defines.inventory.cargo_wagon)
+		local request_proxies = game.surfaces[entity.surface.name].find_entities_filtered{type = "item-request-proxy", name = "item-request-proxy", position = entity.position}
+		local found_proxies = false
+		for _, proxy in pairs(request_proxies) do
+			if proxy.proxy_target == entity then
+				found_proxies = true
+				break
+			end
+		end
+		if (train.manual_mode == false and event.cause and event.cause.train == nil) or (entity.grid and entity.grid.equipment[1]) or (fuel_inv and fuel_inv.is_empty() == false) or (wagon_inv and (wagon_inv.is_filtered() or (wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv)))) or found_proxies then
+			-- registers the ghost entity
+			local registration_number = script.register_on_entity_destroyed(ghost_entity)
+			-- saves type, name and position
+			if global.ick_destroyed_train == nil then
+				global.ick_destroyed_train = {}
+			end
+			global.ick_destroyed_train[registration_number] = {type = entity.type, name = entity.name, position = entity.position}
+			-- saves number of carriages per type if train is in automatic mode
+			if train.manual_mode == false and event.cause and event.cause.train == nil then
+				local carriages = {["locomotive"] = 0, ["cargo-wagon"] = 0, ["fluid-wagon"] = 0, ["artillery-wagon"] = 0}
+				for _, entity in pairs(train.carriages) do
+					carriages[entity.type] = carriages[entity.type] + 1
+				end
+				global.ick_destroyed_train[registration_number].train = carriages
+			end
+			-- adds request for fuel
+			local requests = {}
+			if settings.global["ick-include-fuel"].value then
+				if game.item_prototypes[settings.global["ick-fuel-type"].value] then
+					requests = {[settings.global["ick-fuel-type"].value] = settings.global["ick-fuel-amount"].value}
+				elseif fuel_inv and fuel_inv.is_empty() == false then
+					requests = fuel_inv.get_contents()
+				end
+			end
+			-- adds request for equipment
+			if settings.global["ick-include-equipment"].value and entity.grid and entity.grid.equipment[1] then
+				for name, count in pairs(entity.grid.get_contents()) do
+					if requests[name] then
+						requests[name] = requests[name] + count
+					else
+						requests[name] = count
+					end
+				end
+				-- save equipment if entity is a cargo wagon
+				if entity.type == "cargo-wagon" then
+					global.ick_destroyed_train[registration_number].equipment = entity.grid.get_contents()
+				end
+			end
+			-- adds request for item-request-proxies
+			if found_proxies then
+				for _, proxy in pairs(request_proxies) do
+					if proxy.proxy_target == entity then
+						for name, count in pairs(proxy.item_requests) do
+							if requests[name] then
+								requests[name] = requests[name] + count
+							else
+								requests[name] = count
+							end
+						end
+					end
+				end
+			end
+			ghost_entity.item_requests = requests
+			if wagon_inv then
+				-- saves inventory filters
+				if wagon_inv.is_filtered() then
+					local filters = {}
+					for i = 1, #wagon_inv do
+						table.insert(filters, i, wagon_inv.get_filter(i))
+					end
+					global.ick_destroyed_train[registration_number].filters = filters
+				end
+				-- saves inventory limit
+				if wagon_inv.supports_bar() and (wagon_inv.get_bar() <= #wagon_inv) then
+					global.ick_destroyed_train[registration_number].bar = wagon_inv.get_bar()
+				end
 			end
 		end
 	end
